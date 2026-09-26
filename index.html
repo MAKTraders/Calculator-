@@ -1,0 +1,2122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>TradeCalc - Unit & Site Converter</title>
+  <!-- Favicon using hammer emoji via data URI -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔨</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+
+  <style>
+    /* ==========================================================================
+       CSS VARIABLES & THEMES (Professional Construction Blue & Safety Orange)
+       ========================================================================== */
+    :root {
+      --primary: #1E3A8A;           /* Heavy construction navy */
+      --primary-light: #2563EB;     /* Blue accent */
+      --primary-subtle: #EFF6FF;
+      --accent: #F97316;            /* High-vis safety orange */
+      --accent-hover: #EA580C;
+      --accent-subtle: #FFF7ED;
+      --bg: #F8FAFC;                /* Clean job-site light gray */
+      --surface: #FFFFFF;           /* Card white */
+      --surface-secondary: #F1F5F9;
+      --text: #0F172A;              /* High contrast slate */
+      --text-muted: #64748B;
+      --border: #E2E8F0;
+      --border-focus: #F97316;
+      --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.06);
+      --shadow-md: 0 4px 12px -2px rgba(15, 23, 42, 0.08), 0 2px 6px -1px rgba(15, 23, 42, 0.04);
+      --shadow-lg: 0 10px 25px -5px rgba(15, 23, 42, 0.1);
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --nav-height: 64px;
+      --topbar-height: 60px;
+      --font-main: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    [data-theme="dark"] {
+      --primary: #3B82F6;
+      --primary-light: #60A5FA;
+      --primary-subtle: #1E293B;
+      --accent: #FB923C;
+      --accent-hover: #F97316;
+      --accent-subtle: #2A2017;
+      --bg: #0B0F19;                /* Deep blueprint dark */
+      --surface: #151D2F;           /* Elevated dark surface */
+      --surface-secondary: #1E293B;
+      --text: #F8FAFC;
+      --text-muted: #94A3B8;
+      --border: #283548;
+      --border-focus: #FB923C;
+      --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
+      --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.35);
+      --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.45);
+    }
+
+    /* ==========================================================================
+       RESET & BASE STYLES (Mobile-First, 44px+ touch targets, 16px+ typography)
+       ========================================================================== */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      font-family: var(--font-main);
+      background-color: var(--bg);
+      color: var(--text);
+      font-size: 16px;
+      line-height: 1.5;
+      overflow-x: hidden;
+      transition: background-color 0.25s ease, color 0.25s ease;
+    }
+
+    /* Safe container centered for tablets and desktops, full width on phones */
+    #app-container {
+      width: 100%;
+      max-width: 520px;
+      min-height: 100vh;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      background-color: var(--bg);
+      box-shadow: 0 0 40px rgba(0, 0, 0, 0.05);
+    }
+
+    /* ==========================================================================
+       TOP NAVBAR
+       ========================================================================== */
+    .topbar {
+      height: var(--topbar-height);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background-color: var(--surface);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand-icon-box {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, var(--accent), #D97706);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #FFFFFF;
+      font-weight: 800;
+      font-size: 18px;
+      box-shadow: 0 2px 6px rgba(249, 115, 22, 0.35);
+    }
+
+    .brand-title {
+      font-size: 1.15rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .brand-badge {
+      font-size: 0.65rem;
+      font-weight: 700;
+      background-color: var(--accent-subtle);
+      color: var(--accent);
+      border: 1px solid var(--accent);
+      padding: 2px 6px;
+      border-radius: 999px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .icon-btn {
+      width: 44px;
+      height: 44px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border);
+      background-color: var(--surface-secondary);
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 18px;
+      transition: all 0.15s ease;
+    }
+
+    .icon-btn:active {
+      transform: scale(0.94);
+      background-color: var(--border);
+    }
+
+    /* ==========================================================================
+       MAIN CONTENT & TAB CONTAINERS (With Fade Transition)
+       ========================================================================== */
+    .content-area {
+      flex: 1;
+      padding: 16px 16px calc(var(--nav-height) + 20px) 16px;
+      overflow-y: auto;
+    }
+
+    .tab-pane {
+      display: none;
+      opacity: 0;
+      transform: translateY(6px);
+      transition: opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1), transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .tab-pane.active {
+      display: block;
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ==========================================================================
+       UI CARDS, HEADERS & GRID
+       ========================================================================== */
+    .card {
+      background-color: var(--surface);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border);
+      padding: 18px;
+      margin-bottom: 16px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .card-highlight {
+      border-left: 4px solid var(--accent);
+    }
+
+    .card-title-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+    }
+
+    .card-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .card-subtitle {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-top: -8px;
+      margin-bottom: 14px;
+    }
+
+    .tag {
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 999px;
+      background-color: var(--surface-secondary);
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+    }
+
+    .tag-accent {
+      background-color: var(--accent-subtle);
+      color: var(--accent);
+      border-color: var(--accent);
+    }
+
+    /* Form Fields & Controls */
+    .form-group {
+      margin-bottom: 14px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    .input-row {
+      display: flex;
+      gap: 8px;
+      align-items: stretch;
+    }
+
+    .text-input, .select-input {
+      height: 48px;
+      min-height: 48px; /* 44px+ touch target */
+      font-size: 1.05rem;
+      font-family: var(--font-main);
+      background-color: var(--surface-secondary);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-md);
+      color: var(--text);
+      padding: 0 14px;
+      width: 100%;
+      outline: none;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .text-input:focus, .select-input:focus {
+      border-color: var(--border-focus);
+      box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.15);
+      background-color: var(--surface);
+    }
+
+    .select-input {
+      cursor: pointer;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748B' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      padding-right: 36px;
+    }
+
+    .select-short {
+      max-width: 130px;
+      flex-shrink: 0;
+      font-weight: 600;
+    }
+
+    /* Preset Quick Chips */
+    .chip-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 8px;
+      margin-bottom: 12px;
+    }
+
+    .chip-btn {
+      min-height: 34px;
+      padding: 4px 12px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background-color: var(--surface-secondary);
+      color: var(--text);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s ease;
+    }
+
+    .chip-btn:active {
+      transform: scale(0.95);
+      background-color: var(--accent-subtle);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    /* Result Metric Boxes */
+    .results-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .result-card {
+      background-color: var(--surface-secondary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 12px;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .result-card.full-width {
+      grid-column: 1 / -1;
+    }
+
+    .result-card.hero {
+      background: linear-gradient(135deg, var(--primary-subtle), var(--surface-secondary));
+      border: 1.5px solid var(--primary-light);
+    }
+
+    .result-card.accent-hero {
+      background: linear-gradient(135deg, var(--accent-subtle), var(--surface-secondary));
+      border: 1.5px solid var(--accent);
+    }
+
+    .result-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+
+    .result-val {
+      font-family: var(--font-mono);
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--text);
+      word-break: break-all;
+    }
+
+    .result-val.lg {
+      font-size: 1.55rem;
+      color: var(--accent-hover);
+    }
+
+    .result-sub {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+      font-family: var(--font-main);
+    }
+
+    .copy-chip {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      width: 28px;
+      height: 28px;
+      border-radius: 6px;
+      border: none;
+      background-color: rgba(148, 163, 184, 0.15);
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 13px;
+      transition: background-color 0.15s ease;
+    }
+
+    .copy-chip:active {
+      background-color: var(--accent);
+      color: #FFFFFF;
+    }
+
+    /* Segmented Controls (Buttons like [Weight] [Volume]) */
+    .segmented-control {
+      display: flex;
+      background-color: var(--surface-secondary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 3px;
+      margin-bottom: 16px;
+      gap: 3px;
+    }
+
+    .segment-btn {
+      flex: 1;
+      height: 42px;
+      min-height: 42px;
+      border: none;
+      background: transparent;
+      border-radius: calc(var(--radius-md) - 3px);
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .segment-btn.active {
+      background-color: var(--surface);
+      color: var(--accent);
+      box-shadow: var(--shadow-sm);
+    }
+
+    /* General Button Styles */
+    .btn {
+      height: 48px;
+      min-height: 48px;
+      border-radius: var(--radius-md);
+      border: none;
+      font-size: 0.98rem;
+      font-weight: 700;
+      font-family: var(--font-main);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 0 20px;
+      transition: all 0.15s ease;
+      width: 100%;
+    }
+
+    .btn-primary {
+      background-color: var(--accent);
+      color: #FFFFFF;
+      box-shadow: 0 2px 8px rgba(249, 115, 22, 0.3);
+    }
+
+    .btn-primary:active {
+      background-color: var(--accent-hover);
+      transform: scale(0.98);
+    }
+
+    .btn-outline {
+      background-color: transparent;
+      border: 1.5px solid var(--border);
+      color: var(--text);
+    }
+
+    .btn-outline:active {
+      background-color: var(--surface-secondary);
+    }
+
+    /* Informational & Pro Tip Banners */
+    .tip-box {
+      background-color: var(--primary-subtle);
+      border: 1px solid rgba(59, 130, 246, 0.2);
+      border-radius: var(--radius-md);
+      padding: 12px 14px;
+      margin-top: 14px;
+      font-size: 0.82rem;
+      color: var(--text);
+      display: flex;
+      gap: 10px;
+      line-height: 1.45;
+    }
+
+    .tip-icon {
+      font-size: 16px;
+      flex-shrink: 0;
+      color: var(--primary-light);
+    }
+
+    /* ==========================================================================
+       AD BANNER CONTAINER (Explicitly reserved 60px height to prevent shift)
+       ========================================================================== */
+    .ad-banner-container, #ad-banner-container {
+      width: 100%;
+      height: 60px;
+      min-height: 60px;
+      margin: 18px 0 10px 0;
+      background-color: var(--surface-secondary);
+      border: 1px dashed var(--border);
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      box-sizing: border-box;
+      position: relative;
+    }
+
+    .ad-banner-container::after {
+      content: "Ad Space (60px Placeholder)";
+      opacity: 0.6;
+      font-weight: 600;
+    }
+
+    /* ==========================================================================
+       BOTTOM NAVIGATION BAR (Touch-Friendly, 5 Tabs, Fixed)
+       ========================================================================== */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: 520px;
+      height: var(--nav-height);
+      background-color: var(--surface);
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      padding: 0 4px;
+      box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.05);
+      z-index: 100;
+      padding-bottom: env(safe-area-inset-bottom, 0);
+    }
+
+    .nav-tab {
+      flex: 1;
+      height: 100%;
+      min-height: 48px;
+      background: transparent;
+      border: none;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      cursor: pointer;
+      color: var(--text-muted);
+      transition: color 0.15s ease, transform 0.1s ease;
+      padding: 6px 2px;
+    }
+
+    .nav-tab:active {
+      transform: scale(0.94);
+    }
+
+    .nav-tab.active {
+      color: var(--accent);
+    }
+
+    .nav-tab svg {
+      width: 22px;
+      height: 22px;
+      stroke-width: 2.2;
+      stroke: currentColor;
+      fill: none;
+      transition: transform 0.15s ease;
+    }
+
+    .nav-tab.active svg {
+      transform: translateY(-1px);
+    }
+
+    .nav-tab-label {
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+    }
+
+    /* Quick Swap / Invert Button */
+    .swap-btn-row {
+      display: flex;
+      justify-content: center;
+      margin: -6px 0 10px 0;
+    }
+
+    .swap-circle-btn {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      border: 1.5px solid var(--border);
+      background-color: var(--surface);
+      color: var(--accent);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: var(--shadow-sm);
+      transition: all 0.2s ease;
+    }
+
+    .swap-circle-btn:active {
+      transform: rotate(180deg) scale(0.92);
+      border-color: var(--accent);
+    }
+
+    /* Currency Reference Table */
+    .rate-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+      font-size: 0.85rem;
+    }
+
+    .rate-table th {
+      text-align: left;
+      padding: 8px 10px;
+      background-color: var(--surface-secondary);
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .rate-table td {
+      padding: 10px;
+      border-bottom: 1px solid var(--border);
+      font-family: var(--font-mono);
+    }
+
+    /* Toast notification */
+    #toast {
+      position: fixed;
+      top: 74px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-20px);
+      background-color: #0F172A;
+      color: #FFFFFF;
+      padding: 8px 18px;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      z-index: 1000;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+    }
+
+    #toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+  </style>
+</head>
+<body>
+
+<div id="app-container">
+  <!-- TOP NAVBAR -->
+  <header class="topbar">
+    <div class="brand-group">
+      <div class="brand-icon-box">🔨</div>
+      <div class="brand-title">
+        TradeCalc
+        <span class="brand-badge">PRO SITE</span>
+      </div>
+    </div>
+    <div class="nav-actions">
+      <button id="theme-toggle" class="icon-btn" aria-label="Toggle Dark Mode" title="Toggle Dark/Light Mode">
+        <span id="theme-icon">🌙</span>
+      </button>
+    </div>
+  </header>
+
+  <main class="content-area">
+
+    <!-- ======================================================================
+         1. LENGTH & AREA TAB
+         ====================================================================== -->
+    <section id="tab-length" class="tab-pane active">
+      <!-- Length Converter Card -->
+      <div class="card card-highlight">
+        <div class="card-title-row">
+          <h2 class="card-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 6H3"/><path d="M21 12H3"/><path d="M21 18H3"/><path d="M7 6v3"/><path d="M12 6v6"/><path d="M17 6v3"/></svg>
+            Linear Length Converter
+          </h2>
+          <span class="tag tag-accent">Live Conversion</span>
+        </div>
+        <p class="card-subtitle">Convert instant site measurements between metric and imperial</p>
+
+        <div class="form-group">
+          <label class="form-label" for="length-val">Enter Distance / Dimension</label>
+          <div class="input-row">
+            <input type="number" id="length-val" class="text-input" placeholder="e.g. 10" value="10" step="any" min="0">
+            <select id="length-unit" class="select-input select-short">
+              <option value="m">Meters (m)</option>
+              <option value="ft" selected>Feet (ft)</option>
+              <option value="in">Inches (in)</option>
+              <option value="cm">Centimeters (cm)</option>
+              <option value="yd">Yards (yd)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Quick Presets -->
+        <div class="chip-container">
+          <button class="chip-btn" onclick="setLengthPreset(1, 'm')">1 m</button>
+          <button class="chip-btn" onclick="setLengthPreset(8, 'ft')">8 ft (Sheet)</button>
+          <button class="chip-btn" onclick="setLengthPreset(10, 'ft')">10 ft</button>
+          <button class="chip-btn" onclick="setLengthPreset(100, 'ft')">100 ft</button>
+          <button class="chip-btn" onclick="setLengthPreset(1, 'yd')">1 Yard</button>
+          <button class="chip-btn" onclick="setLengthPreset(12, 'in')">12 in</button>
+        </div>
+
+        <!-- Live Conversion Grid -->
+        <div class="results-grid">
+          <div class="result-card">
+            <button class="copy-chip" onclick="copyValue('out-len-m')" title="Copy">📋</button>
+            <span class="result-label">Meters (m)</span>
+            <span id="out-len-m" class="result-val">3.048</span>
+            <span class="result-sub">Metric Base</span>
+          </div>
+
+          <div class="result-card">
+            <button class="copy-chip" onclick="copyValue('out-len-ft')" title="Copy">📋</button>
+            <span class="result-label">Feet (ft & in)</span>
+            <span id="out-len-ft" class="result-val">10.00</span>
+            <span id="out-len-ftin" class="result-sub">10' 0"</span>
+          </div>
+
+          <div class="result-card">
+            <button class="copy-chip" onclick="copyValue('out-len-in')" title="Copy">📋</button>
+            <span class="result-label">Inches (in)</span>
+            <span id="out-len-in" class="result-val">120.0</span>
+            <span class="result-sub">Imperial</span>
+          </div>
+
+          <div class="result-card">
+            <button class="copy-chip" onclick="copyValue('out-len-cm')" title="Copy">📋</button>
+            <span class="result-label">Centimeters (cm)</span>
+            <span id="out-len-cm" class="result-val">304.8</span>
+            <span class="result-sub">Metric</span>
+          </div>
+
+          <div class="result-card full-width">
+            <button class="copy-chip" onclick="copyValue('out-len-yd')" title="Copy">📋</button>
+            <span class="result-label">Yards (yd)</span>
+            <span id="out-len-yd" class="result-val">3.333 yd</span>
+            <span class="result-sub">1 Yard = 3 Feet = 36 Inches</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Area & Surface Calculator Card -->
+      <div class="card">
+        <div class="card-title-row">
+          <h2 class="card-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
+            Area & Sheet Coverage
+          </h2>
+          <span class="tag">L × W</span>
+        </div>
+        <p class="card-subtitle">Calculate floor, wall, or ceiling area with automatic sheet material estimate</p>
+
+        <div class="form-group">
+          <label class="form-label" for="area-length">Length</label>
+          <div class="input-row">
+            <input type="number" id="area-length" class="text-input" placeholder="Length" value="12" step="any" min="0">
+            <select id="area-len-unit" class="select-input select-short">
+              <option value="ft" selected>Feet (ft)</option>
+              <option value="m">Meters (m)</option>
+              <option value="in">Inches (in)</option>
+              <option value="cm">cm</option>
+              <option value="yd">Yards (yd)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="area-width">Width</label>
+          <div class="input-row">
+            <input type="number" id="area-width" class="text-input" placeholder="Width" value="10" step="any" min="0">
+            <select id="area-wid-unit" class="select-input select-short">
+              <option value="ft" selected>Feet (ft)</option>
+              <option value="m">Meters (m)</option>
+              <option value="in">Inches (in)</option>
+              <option value="cm">cm</option>
+              <option value="yd">Yards (yd)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Area Results -->
+        <div class="results-grid">
+          <div class="result-card hero">
+            <span class="result-label">Square Feet (sq ft)</span>
+            <span id="out-area-sqft" class="result-val lg">120.0</span>
+            <span class="result-sub">ft² Imperial</span>
+          </div>
+
+          <div class="result-card hero">
+            <span class="result-label">Square Meters (m²)</span>
+            <span id="out-area-sqm" class="result-val lg">11.15</span>
+            <span class="result-sub">m² Metric</span>
+          </div>
+
+          <div class="result-card">
+            <span class="result-label">Square Yards</span>
+            <span id="out-area-sqyd" class="result-val">13.33 yd²</span>
+            <span class="result-sub">Carpet / Flooring</span>
+          </div>
+
+          <div class="result-card accent-hero">
+            <span class="result-label">4×8 ft Sheets (Drywall/Ply)</span>
+            <span id="out-area-sheets" class="result-val">4 Sheets</span>
+            <span id="out-area-sheets-sub" class="result-sub">(3.75 exact + 10% waste: 5)</span>
+          </div>
+
+          <div class="result-card full-width">
+            <span class="result-label">Total Perimeter / Baseboard</span>
+            <span id="out-area-perimeter" class="result-val">44.0 ft (13.41 m)</span>
+            <span class="result-sub">Running perimeter for skirting, trims, framing</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- AD BANNER PLACEHOLDER (Reserved 60px) -->
+      <div id="ad-banner-container-tab1" class="ad-banner-container"></div>
+    </section>
+
+    <!-- ======================================================================
+         2. WEIGHT & VOLUME TAB
+         ====================================================================== -->
+    <section id="tab-weight" class="tab-pane">
+      <div class="segmented-control">
+        <button id="wv-mode-weight" class="segment-btn active" onclick="switchWVMode('weight')">
+          ⚖️ Weight & Mass
+        </button>
+        <button id="wv-mode-volume" class="segment-btn" onclick="switchWVMode('volume')">
+          🧊 Volume & Liquid
+        </button>
+      </div>
+
+      <!-- Weight Panel -->
+      <div id="wv-weight-panel" class="card card-highlight">
+        <div class="card-title-row">
+          <h2 class="card-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="M7 21h10"/><path d="M12 3v18"/><path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"/></svg>
+            Site Weight Converter
+          </h2>
+          <span class="tag tag-accent">Real-time</span>
+        </div>
+        <p class="card-subtitle">Convert bulk material, bags, and load capacities</p>
+
+        <div class="form-group">
+          <label class="form-label" for="weight-val">Enter Weight / Mass</label>
+          <div class="input-row">
+            <input type="number" id="weight-val" class="text-input" placeholder="e.g. 50" value="50" step="any" min="0">
+            <select id="weight-unit" class="select-input select-short">
+              <option value="kg" selected>Kilograms (kg)</option>
+              <option value="lbs">Pounds (lbs)</option>
+              <option value="g">Grams (g)</option>
+              <option value="ton">Metric Tons (t)</option>
+              <option value="oz">Ounces (oz)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="chip-container">
+          <button class="chip-btn" onclick="setWeightPreset(1, 'kg')">1 kg</button>
+          <button class="chip-btn" onclick="setWeightPreset(25, 'kg')">25 kg (Dry Mix)</button>
+          <button class="chip-btn" onclick="setWeightPreset(50, 'kg')">50 kg (Cement)</button>
+          <button class="chip-btn" onclick="setWeightPreset(94, 'lbs')">94 lbs (US Bag)</button>
+          <button class="chip-btn" onclick="setWeightPreset(100, 'lbs')">100 lbs</button>
+          <button class="chip-btn" onclick="setWeightPreset(1, 'ton')">1 Ton</button>
+        </div>
+
+        <div class="results-grid">
+          <div class="result-card hero">
+            <button class="copy-chip" onclick="copyValue('out-w-kg')" title="Copy">📋</button>
+            <span class="result-label">Kilograms (kg)</span>
+            <span id="out-w-kg" class="result-val lg">50.00</span>
+            <span class="result-sub">Metric standard</span>
+          </div>
+
+          <div class="result-card hero">
+            <button class="copy-chip" onclick="copyValue('out-w-lbs')" title="Copy">📋</button>
+            <span class="result-label">Pounds (lbs)</span>
+            <span id="out-w-lbs" class="result-val lg">110.23</span>
+            <span class="result-sub">Imperial standard</span>
+          </div>
+
+          <div class="result-card">
+            <button class="copy-chip" onclick="copyValue('out-w-g')" title="Copy">📋</button>
+            <span class="result-label">Grams (g)</span>
+            <span id="out-w-g" class="result-val">50,000 g</span>
+            <span class="result-sub">Small hardware & pigments</span>
+          </div>
+
+          <div class="result-card">
+            <button class="copy-chip" onclick="copyValue('out-w-ton')" title="Copy">📋</button>
+            <span class="result-label">Metric Tons (t)</span>
+            <span id="out-w-ton" class="result-val">0.050 t</span>
+            <span class="result-sub">1 Ton = 1,000 kg</span>
+          </div>
+
+          <div class="result-card full-width">
+            <button class="copy-chip" onclick="copyValue('out-w-oz')" title="Copy">📋</button>
+            <span class="result-label">Ounces (oz)</span>
+            <span id="out-w-oz" class="result-val">1,763.7 oz</span>
+            <span class="result-sub">1 lb = 16 oz</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Volume Panel -->
+      <div id="wv-volume-panel" class="card card-highlight" style="display: none;">
+        <div class="card-title-row">
+          <h2 class="card-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+            Volume & Bulk Converter
+          </h2>
+          <span class="tag tag-accent">Real-time</span>
+        </div>
+        <p class="card-subtitle">Convert water, tank capacities, and excavation volumes</p>
+
+        <div class="form-group">
+          <label class="form-label" for="volume-val">Enter Volume</label>
+          <div class="input-row">
+            <input type="number" id="volume-val" class="text-input" placeholder="e.g. 1" value="1" step="any" min="0">
+            <select id="volume-unit" class="select-input select-short">
+              <option value="m3" selected>Cubic Meters (m³)</option>
+              <option value="l">Liters (L)</option>
+              <option value="gal">Gallons (US gal)</option>
+              <option value="cuft">Cubic Feet (cu ft)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="chip-container">
+          <button class="chip-btn" onclick="setVolumePreset(1, 'm3')">1 m³</button>
+          <button class="chip-btn" onclick="setVolumePreset(1, 'cuft')">1 cu ft</button>
+          <button class="chip-btn" onclick="setVolumePreset(5, 'gal')">5 Gal (Bucket)</button>
+          <button class="chip-btn" onclick="setVolumePreset(1000, 'l')">1000 L (Tote)</button>
+          <button class="chip-btn" onclick="setVolumePreset(1, 'gal')">1 Gal</button>
+        </div>
+
+        <div class="results-grid">
+          <div class="result-card hero">
+            <button class="copy-chip" onclick="copyValue('out-v-m3')" title="Copy">📋</button>
+            <span class="result-label">Cubic Meters (m³)</span>
+            <span id="out-v-m3" class="result-val lg">1.000</span>
+            <span class="result-sub">Metric solid volume</span>
+          </div>
+
+          <div class="result-card hero">
+            <button class="copy-chip" onclick="copyValue('out-v-cuft')" title="Copy">📋</button>
+            <span class="result-label">Cubic Feet (cu ft)</span>
+            <span id="out-v-cuft" class="result-val lg">35.31</span>
+            <span class="result-sub">Imperial solid volume</span>
+          </div>
+
+          <div class="result-card">
+            <button class="copy-chip" onclick="copyValue('out-v-l')" title="Copy">📋</button>
+            <span class="result-label">Liters (L)</span>
+            <span id="out-v-l" class="result-val">1,000.0 L</span>
+            <span class="result-sub">1 m³ = 1,000 Liters</span>
+          </div>
+
+          <div class="result-card">
+            <button class="copy-chip" onclick="copyValue('out-v-gal')" title="Copy">📋</button>
+            <span class="result-label">US Gallons (gal)</span>
+            <span id="out-v-gal" class="result-val">264.17 gal</span>
+            <span class="result-sub">1 gal = 3.785 L</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Trade Densities Reference Card -->
+      <div class="card">
+        <h3 class="card-title" style="font-size: 0.95rem;">🧱 On-Site Material Density Guide</h3>
+        <p class="card-subtitle" style="margin-bottom: 8px;">Approximate weights for 1 Cubic Meter (m³):</p>
+        <div style="font-size: 0.85rem; line-height: 1.6; color: var(--text);">
+          <div>• <strong>Water:</strong> 1 m³ = 1,000 kg (1.0 Metric Ton / 2,204 lbs)</div>
+          <div>• <strong>Ready-Mix Concrete:</strong> 1 m³ ≈ 2,400 kg (2.4 Tons / 5,290 lbs)</div>
+          <div>• <strong>Dry Construction Sand:</strong> 1 m³ ≈ 1,600 kg (1.6 Tons / 3,520 lbs)</div>
+          <div>• <strong>Crushed Stone / Gravel:</strong> 1 m³ ≈ 1,500 kg (1.5 Tons / 3,300 lbs)</div>
+        </div>
+      </div>
+
+      <!-- AD BANNER PLACEHOLDER (Reserved 60px) -->
+      <div id="ad-banner-container-tab2" class="ad-banner-container"></div>
+    </section>
+
+    <!-- ======================================================================
+         3. MIX RATIOS TAB (Unique Selling Feature)
+         ====================================================================== -->
+    <section id="tab-mix" class="tab-pane">
+      <!-- Cement Concrete Mix Calculator -->
+      <div class="card card-highlight">
+        <div class="card-title-row">
+          <h2 class="card-title">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 20h20"/><path d="m5 20 2-10h10l2 10"/><path d="M12 4v6"/><path d="M9 4h6"/></svg>
+            Concrete & Cement Mixer
+          </h2>
+          <span class="tag tag-accent">Civil Eng Standard</span>
+        </div>
+        <p class="card-subtitle">Exact bag quantities, sand, aggregate & water with 1.54 dry volume factor</p>
+
+        <div class="form-group">
+          <label class="form-label" for="mix-vol">Total Volume Needed</label>
+          <div class="input-row">
+            <input type="number" id="mix-vol" class="text-input" placeholder="e.g. 1" value="1" step="any" min="0">
+            <select id="mix-vol-unit" class="select-input select-short">
+              <option value="m3" selected>m³ (Cubic M)</option>
+              <option value="cuft">cu ft (Cubic Ft)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="mix-ratio">Concrete Mix Ratio (Cement : Sand : Aggregate)</label>
+          <select id="mix-ratio" class="select-input">
+            <option value="1:2:4" selected>1 : 2 : 4 — M15 (Driveways, slabs, paths, standard floors)</option>
+            <option value="1:3:6">1 : 3 : 6 — M10 (Foundation footings, mass fill concrete)</option>
+            <option value="1:1.5:3">1 : 1.5 : 3 — M20 (Reinforced slabs, lintels, columns, beams)</option>
+            <option value="1:1:2">1 : 1 : 2 — M25 (High strength columns, water tanks, heavy load)</option>
+            <option value="1:4:0">1 : 4 — Mortar (Bricklaying & wall plastering)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Cement Bag Size & Safety Margin</label>
+          <div class="input-row">
+            <select id="mix-bag-size" class="select-input">
+              <option value="50" selected>Standard 50 kg Bag</option>
+              <option value="42.637">US 94 lb Bag (42.6 kg)</option>
+            </select>
+            <select id="mix-waste" class="select-input select-short">
+              <option value="0">+0% waste</option>
+              <option value="5" selected>+5% waste</option>
+              <option value="10">+10% waste</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Calculated Batch Summary -->
+        <div class="results-grid">
+          <div class="result-card accent-hero full-width">
+            <span class="result-label">Cement Required</span>
+            <div style="display: flex; align-items: baseline; gap: 8px;">
+              <span id="out-mix-bags" class="result-val lg">7 Bags</span>
+              <span id="out-mix-bags-exact" style="font-size: 0.9rem; color: var(--text-muted);">(6.9 exact)</span>
+            </div>
+            <span id="out-mix-cement-wt" class="result-sub">347 kg (765 lbs) Total Cement Weight</span>
+          </div>
+
+          <div class="result-card">
+            <span class="result-label">Sand (Fine Aggregate)</span>
+            <span id="out-mix-sand-vol" class="result-val">0.48 m³</span>
+            <span id="out-mix-sand-sub" class="result-sub">17.0 cu ft • ~770 kg</span>
+          </div>
+
+          <div class="result-card">
+            <span class="result-label">Stone / Gravel</span>
+            <span id="out-mix-agg-vol" class="result-val">0.96 m³</span>
+            <span id="out-mix-agg-sub" class="result-sub">34.0 cu ft • ~1,440 kg</span>
+          </div>
+
+          <div class="result-card full-width hero">
+            <span class="result-label">Estimated Water (w/c ~ 0.50)</span>
+            <span id="out-mix-water" class="result-val">174 Liters (46.0 US Gal)</span>
+            <span class="result-sub">Approx 25 Liters of water per 50 kg bag of cement for workable slump</span>
+          </div>
+        </div>
+
+        <div class="tip-box">
+          <div class="tip-icon">💡</div>
+          <div>
+            <strong>Site Bucket Rule:</strong> For a 1:2:4 batch, use 1 bucket cement, 2 buckets sand, 4 buckets gravel, and ~0.5 bucket water.
+          </div>
+        </div>
+      </div>
+
+      <!-- Paint Estimation Calculator -->
+      <div class="card">
+        <div class="card-title-row">
+          <h2 class="card-title">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m19 11-8-8-8.6 8.6a2 2 0 0 0 0 2.8l5.2 5.2c.8.8 2 .8 2.8 0L19 11Z"/><path d="m5 2 5 5"/><path d="M2 13h15"/><path d="M22 20a2 2 0 1 1-4 0c0-1.6 1.7-2.4 2-4 .3 1.6 2 2.4 2 4Z"/></svg>
+            Wall & Surface Paint Calculator
+          </h2>
+          <span class="tag">Painter Spec</span>
+        </div>
+        <p class="card-subtitle">Calculate paint volume, coverage rates, and container buy lists</p>
+
+        <div class="form-group">
+          <label class="form-label" for="paint-area">Wall / Surface Area</label>
+          <div class="input-row">
+            <input type="number" id="paint-area" class="text-input" placeholder="Area" value="50" step="any" min="0">
+            <select id="paint-area-unit" class="select-input select-short">
+              <option value="sqm" selected>m² (sq meters)</option>
+              <option value="sqft">sq ft (sq feet)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <div class="input-row">
+            <div style="flex: 1;">
+              <label class="form-label" for="paint-coats">Number of Coats</label>
+              <select id="paint-coats" class="select-input">
+                <option value="1">1 Coat (Touch-up / Primer)</option>
+                <option value="2" selected>2 Coats (Standard finish)</option>
+                <option value="3">3 Coats (Raw drywall / Dark to light)</option>
+              </select>
+            </div>
+            <div style="flex: 1;">
+              <label class="form-label" for="paint-coverage">Coverage Rate</label>
+              <select id="paint-coverage" class="select-input">
+                <option value="12">Smooth (12 m²/L • 490 sqft/gal)</option>
+                <option value="10" selected>Standard (10 m²/L • 400 sqft/gal)</option>
+                <option value="8">Rough / Brick (8 m²/L • 325 sqft/gal)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Deduct Openings (Doors & Windows)</label>
+          <div class="input-row">
+            <input type="number" id="paint-doors" class="text-input" placeholder="Doors" value="1" min="0" title="Doors to deduct (~2 m² / 21 sq ft each)">
+            <input type="number" id="paint-windows" class="text-input" placeholder="Windows" value="2" min="0" title="Windows to deduct (~1.5 m² / 16 sq ft each)">
+          </div>
+          <span style="font-size: 0.75rem; color: var(--text-muted); display: block; margin-top: 4px;">
+            Auto-deducts ~2 m² (21 sq ft) per door, ~1.5 m² (16 sq ft) per window.
+          </span>
+        </div>
+
+        <!-- Paint Results -->
+        <div class="results-grid">
+          <div class="result-card accent-hero full-width">
+            <span class="result-label">Total Paint Needed</span>
+            <div style="display: flex; align-items: baseline; gap: 8px;">
+              <span id="out-paint-liters" class="result-val lg">9.0 Liters</span>
+              <span id="out-paint-gal" style="font-size: 0.95rem; color: var(--text-muted);">(2.38 US Gallons)</span>
+            </div>
+            <span id="out-paint-buy" class="result-sub" style="font-weight: 600; color: var(--accent);">
+              Recommended Purchase: 2 × 5L Cans (10 L)
+            </span>
+          </div>
+
+          <div class="result-card">
+            <span class="result-label">Net Painted Surface</span>
+            <span id="out-paint-net-area" class="result-val">45.0 m²</span>
+            <span id="out-paint-net-sub" class="result-sub">484.4 sq ft after openings</span>
+          </div>
+
+          <div class="result-card">
+            <span class="result-label">Total Applied Area</span>
+            <span id="out-paint-total-area" class="result-val">90.0 m²</span>
+            <span class="result-sub">Across 2 coats</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- AD BANNER PLACEHOLDER (Reserved 60px) -->
+      <div id="ad-banner-container-tab3" class="ad-banner-container"></div>
+    </section>
+
+    <!-- ======================================================================
+         4. CURRENCY TAB
+         ====================================================================== -->
+    <section id="tab-currency" class="tab-pane">
+      <div class="card card-highlight">
+        <div class="card-title-row">
+          <h2 class="card-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+            Offline Currency Converter
+          </h2>
+          <span class="tag tag-accent">Offline-First</span>
+        </div>
+        <p class="card-subtitle">Set today's rate once; saved locally on your device for job-site use</p>
+
+        <!-- Amount to Convert -->
+        <div class="form-group">
+          <label class="form-label" for="curr-amount">Amount</label>
+          <input type="number" id="curr-amount" class="text-input" placeholder="Amount" value="100" step="any" min="0">
+        </div>
+
+        <!-- From Currency & To Currency -->
+        <div class="form-group">
+          <div class="input-row">
+            <div style="flex: 1;">
+              <label class="form-label" for="curr-from">From</label>
+              <select id="curr-from" class="select-input">
+                <option value="USD" selected>USD ($) — US Dollar</option>
+                <option value="EUR">EUR (€) — Euro</option>
+                <option value="GBP">GBP (£) — British Pound</option>
+                <option value="INR">INR (₹) — Indian Rupee</option>
+                <option value="NGN">NGN (₦) — Nigerian Naira</option>
+                <option value="PHP">PHP (₱) — Philippine Peso</option>
+                <option value="CAD">CAD ($) — Canadian Dollar</option>
+                <option value="AUD">AUD ($) — Australian Dollar</option>
+              </select>
+            </div>
+
+            <div style="flex: 1;">
+              <label class="form-label" for="curr-to">To</label>
+              <select id="curr-to" class="select-input">
+                <option value="EUR" selected>EUR (€) — Euro</option>
+                <option value="USD">USD ($) — US Dollar</option>
+                <option value="GBP">GBP (£) — British Pound</option>
+                <option value="INR">INR (₹) — Indian Rupee</option>
+                <option value="NGN">NGN (₦) — Nigerian Naira</option>
+                <option value="PHP">PHP (₱) — Philippine Peso</option>
+                <option value="CAD">CAD ($) — Canadian Dollar</option>
+                <option value="AUD">AUD ($) — Australian Dollar</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Swap Currencies Button -->
+        <div class="swap-btn-row">
+          <button class="swap-circle-btn" onclick="swapCurrencies()" title="Swap Currencies">
+            ⇄
+          </button>
+        </div>
+
+        <!-- Manual Rate Input (Stored in localStorage) -->
+        <div class="form-group">
+          <label class="form-label" for="curr-rate">
+            Manual Exchange Rate (1 <span id="label-from-code">USD</span> = )
+          </label>
+          <div class="input-row">
+            <input type="number" id="curr-rate" class="text-input" placeholder="Exchange Rate" value="0.92" step="any" min="0">
+            <button class="btn btn-outline select-short" onclick="saveManualRate()" style="font-size: 0.85rem;">
+              Save Rate
+            </button>
+          </div>
+          <span id="rate-save-status" style="font-size: 0.75rem; color: var(--accent); display: block; margin-top: 4px;">
+            Rate auto-saved to device localStorage
+          </span>
+        </div>
+
+        <!-- Converted Value Hero -->
+        <div class="results-grid">
+          <div class="result-card hero full-width">
+            <span class="result-label">Converted Total</span>
+            <span id="out-curr-total" class="result-val lg">€ 92.00 EUR</span>
+            <span id="out-curr-sub" class="result-sub">100 USD @ 0.92</span>
+          </div>
+        </div>
+
+        <!-- Quick Reference Ladder -->
+        <div style="margin-top: 18px;">
+          <label class="form-label">Site Pay / Material Reference Table</label>
+          <table class="rate-table">
+            <thead>
+              <tr>
+                <th id="th-curr-from">Amount (USD)</th>
+                <th id="th-curr-to">Converted (EUR)</th>
+              </tr>
+            </thead>
+            <tbody id="curr-quick-table-body">
+              <!-- Rendered via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- AD BANNER PLACEHOLDER (Reserved 60px) -->
+      <div id="ad-banner-container-tab4" class="ad-banner-container"></div>
+    </section>
+
+    <!-- ======================================================================
+         5. SETTINGS TAB
+         ====================================================================== -->
+    <section id="tab-settings" class="tab-pane">
+      <!-- Preferences Card -->
+      <div class="card card-highlight">
+        <div class="card-title-row">
+          <h2 class="card-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+            App Preferences
+          </h2>
+          <span class="tag">Config</span>
+        </div>
+
+        <div style="display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border);">
+          <div>
+            <div style="font-weight: 700; color: var(--text);">Dark Mode</div>
+            <div style="font-size: 0.8rem; color: var(--text-muted);">Optimal for bright sunlight or night shifts</div>
+          </div>
+          <button id="settings-dark-toggle" class="btn btn-outline" style="width: auto; height: 38px; min-height: 38px; padding: 0 14px; font-size: 0.85rem;" onclick="toggleTheme()">
+            Switch Theme
+          </button>
+        </div>
+
+        <div style="display: flex; align-items: center; justify-content: space-between; padding: 14px 0;">
+          <div>
+            <div style="font-weight: 700; color: var(--text);">Reset Cached Data</div>
+            <div style="font-size: 0.8rem; color: var(--text-muted);">Restores default currency exchange rates & inputs</div>
+          </div>
+          <button class="btn btn-outline" style="width: auto; height: 38px; min-height: 38px; padding: 0 14px; font-size: 0.85rem; color: #EF4444; border-color: #EF4444;" onclick="resetAppData()">
+            Reset All
+          </button>
+        </div>
+      </div>
+
+      <!-- About & Trade Guidelines Card -->
+      <div class="card">
+        <h2 class="card-title" style="margin-bottom: 8px;">
+          🔨 TradeCalc - Unit & Site Converter
+        </h2>
+        <p style="font-size: 0.88rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 14px;">
+          Engineered for construction trades, carpenters, painters, masons, electricians, and plumbers. Operates 100% offline with zero external network dependencies.
+        </p>
+
+        <div style="font-size: 0.82rem; color: var(--text); border-top: 1px solid var(--border); padding-top: 12px;">
+          <div style="font-weight: 700; margin-bottom: 6px; text-transform: uppercase; color: var(--text-muted);">Trades Quick Cheat-Sheet</div>
+          <div style="margin-bottom: 4px;">• <strong>Drywall/Plywood Standard:</strong> 4 ft × 8 ft = 32 sq ft (2.97 m²)</div>
+          <div style="margin-bottom: 4px;">• <strong>Stud Wall Spacing:</strong> Standard 16" (406 mm) on-center or 24" (610 mm)</div>
+          <div style="margin-bottom: 4px;">• <strong>Standard Concrete Bag:</strong> 50 kg yields ~0.035 m³ wet concrete</div>
+          <div style="margin-bottom: 4px;">• <strong>Paint Rule:</strong> 1 Liter covers ~10 m² (400 sq ft per US Gallon)</div>
+        </div>
+
+        <div style="margin-top: 14px; padding-top: 10px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem; color: var(--text-muted);">
+          <span>Version 1.0.0 (Offline Edition)</span>
+          <span>Zero Telemetry</span>
+        </div>
+      </div>
+
+      <!-- DEDICATED REQUIRED AD BANNER CONTAINER PLACEHOLDER (Exact ID as specified) -->
+      <div id="ad-banner-container"></div>
+    </section>
+
+  </main>
+
+  <!-- ========================================================================
+       BOTTOM NAVIGATION BAR (5 Tabs)
+       ======================================================================== -->
+  <nav class="bottom-nav">
+    <button class="nav-tab active" data-tab="tab-length">
+      <svg viewBox="0 0 24 24"><path d="M21 6H3"/><path d="M21 12H3"/><path d="M21 18H3"/><path d="M7 6v3"/><path d="M12 6v6"/><path d="M17 6v3"/></svg>
+      <span class="nav-tab-label">Length</span>
+    </button>
+
+    <button class="nav-tab" data-tab="tab-weight">
+      <svg viewBox="0 0 24 24"><path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="M7 21h10"/><path d="M12 3v18"/><path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"/></svg>
+      <span class="nav-tab-label">Weight</span>
+    </button>
+
+    <button class="nav-tab" data-tab="tab-mix">
+      <svg viewBox="0 0 24 24"><path d="M2 20h20"/><path d="m5 20 2-10h10l2 10"/><path d="M12 4v6"/><path d="M9 4h6"/></svg>
+      <span class="nav-tab-label">Mix Ratios</span>
+    </button>
+
+    <button class="nav-tab" data-tab="tab-currency">
+      <svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+      <span class="nav-tab-label">Currency</span>
+    </button>
+
+    <button class="nav-tab" data-tab="tab-settings">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      <span class="nav-tab-label">Settings</span>
+    </button>
+  </nav>
+
+  <div id="toast">Copied to clipboard!</div>
+</div>
+
+<!-- ==========================================================================
+     VANILLA JAVASCRIPT APPLICATION LOGIC
+     ========================================================================== -->
+<script>
+  /* ==========================================================================
+     INITIALIZATION & GLOBAL STORAGE HELPERS
+     ========================================================================== */
+  const STORAGE_KEY_THEME = 'tradecalc_theme';
+  const STORAGE_KEY_TAB = 'tradecalc_active_tab';
+  const STORAGE_KEY_CURR_RATES = 'tradecalc_currency_rates_v1';
+
+  // Fallback exchange rates against USD
+  const DEFAULT_RATES = {
+    USD: 1.0,
+    EUR: 0.92,
+    GBP: 0.79,
+    INR: 83.4,
+    NGN: 1580.0,
+    PHP: 56.5,
+    CAD: 1.36,
+    AUD: 1.52
+  };
+
+  const CURRENCY_SYMBOLS = {
+    USD: '$',
+    EUR: '€',
+    GBP: '£',
+    INR: '₹',
+    NGN: '₦',
+    PHP: '₱',
+    CAD: 'CA$',
+    AUD: 'A$'
+  };
+
+  function getStoredRates() {
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY_CURR_RATES);
+      if (stored) {
+        return Object.assign({}, DEFAULT_RATES, JSON.parse(stored));
+      }
+    } catch (e) {
+      console.warn("localStorage rates access error:", e);
+    }
+    return Object.assign({}, DEFAULT_RATES);
+  }
+
+  function saveStoredRates(rates) {
+    try {
+      localStorage.setItem(STORAGE_KEY_CURR_RATES, JSON.stringify(rates));
+    } catch (e) {
+      console.warn("localStorage save error:", e);
+    }
+  }
+
+  /* ==========================================================================
+     THEME / DARK MODE
+     ========================================================================== */
+  function initTheme() {
+    const saved = localStorage.getItem(STORAGE_KEY_THEME);
+    if (saved) {
+      applyTheme(saved);
+    } else {
+      const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      applyTheme(prefersDark ? 'dark' : 'light');
+    }
+  }
+
+  function applyTheme(theme) {
+    if (theme === 'dark') {
+      document.documentElement.setAttribute('data-theme', 'dark');
+      document.getElementById('theme-icon').textContent = '☀️';
+    } else {
+      document.documentElement.removeAttribute('data-theme');
+      document.getElementById('theme-icon').textContent = '🌙';
+    }
+    localStorage.setItem(STORAGE_KEY_THEME, theme);
+  }
+
+  function toggleTheme() {
+    const current = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+    const next = current === 'dark' ? 'light' : 'dark';
+    applyTheme(next);
+    showToast(next === 'dark' ? 'Dark theme enabled' : 'Light theme enabled');
+  }
+
+  document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
+
+  /* ==========================================================================
+     NAVIGATION & TABS (Persisted to localStorage with Fade Transition)
+     ========================================================================== */
+  function initTabs() {
+    const tabButtons = document.querySelectorAll('.nav-tab');
+    const tabPanes = document.querySelectorAll('.tab-pane');
+
+    tabButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const targetId = btn.getAttribute('data-tab');
+        switchTab(targetId);
+      });
+    });
+
+    const lastTab = localStorage.getItem(STORAGE_KEY_TAB);
+    if (lastTab && document.getElementById(lastTab)) {
+      switchTab(lastTab, false);
+    }
+  }
+
+  function switchTab(tabId, animate = true) {
+    const tabButtons = document.querySelectorAll('.nav-tab');
+    const tabPanes = document.querySelectorAll('.tab-pane');
+
+    tabButtons.forEach(btn => {
+      if (btn.getAttribute('data-tab') === tabId) {
+        btn.classList.add('active');
+      } else {
+        btn.classList.remove('active');
+      }
+    });
+
+    tabPanes.forEach(pane => {
+      if (pane.id === tabId) {
+        pane.classList.add('active');
+      } else {
+        pane.classList.remove('active');
+      }
+    });
+
+    localStorage.setItem(STORAGE_KEY_TAB, tabId);
+    window.scrollTo({ top: 0, behavior: animate ? 'smooth' : 'auto' });
+  }
+
+  /* ==========================================================================
+     1. LENGTH & AREA TAB CALCULATIONS
+     ========================================================================== */
+  const lengthValInput = document.getElementById('length-val');
+  const lengthUnitSelect = document.getElementById('length-unit');
+
+  function calculateLength() {
+    const val = parseFloat(lengthValInput.value);
+    if (isNaN(val) || val < 0) {
+      document.getElementById('out-len-m').textContent = '—';
+      document.getElementById('out-len-ft').textContent = '—';
+      document.getElementById('out-len-ftin').textContent = '—';
+      document.getElementById('out-len-in').textContent = '—';
+      document.getElementById('out-len-cm').textContent = '—';
+      document.getElementById('out-len-yd').textContent = '—';
+      return;
+    }
+
+    const unit = lengthUnitSelect.value;
+    // Normalize to meters
+    let meters = 0;
+    if (unit === 'm') meters = val;
+    else if (unit === 'ft') meters = val * 0.3048;
+    else if (unit === 'in') meters = val * 0.0254;
+    else if (unit === 'cm') meters = val * 0.01;
+    else if (unit === 'yd') meters = val * 0.9144;
+
+    const feet = meters / 0.3048;
+    const inches = meters / 0.0254;
+    const cm = meters * 100;
+    const yards = meters / 0.9144;
+
+    // Feet + Inches breakdown (e.g. 5.5 ft = 5' 6")
+    const wholeFeet = Math.floor(feet);
+    const remainderInches = Math.round((feet - wholeFeet) * 12);
+    let feetInchesStr = `${wholeFeet}' ${remainderInches}"`;
+    if (remainderInches === 12) {
+      feetInchesStr = `${wholeFeet + 1}' 0"`;
+    }
+
+    document.getElementById('out-len-m').textContent = formatNum(meters, 4);
+    document.getElementById('out-len-ft').textContent = formatNum(feet, 2);
+    document.getElementById('out-len-ftin').textContent = feetInchesStr;
+    document.getElementById('out-len-in').textContent = formatNum(inches, 1);
+    document.getElementById('out-len-cm').textContent = formatNum(cm, 1);
+    document.getElementById('out-len-yd').textContent = formatNum(yards, 3) + ' yd';
+  }
+
+  function setLengthPreset(val, unit) {
+    lengthValInput.value = val;
+    lengthUnitSelect.value = unit;
+    calculateLength();
+  }
+
+  lengthValInput.addEventListener('input', calculateLength);
+  lengthUnitSelect.addEventListener('change', calculateLength);
+
+  // Area Calculator
+  const areaLengthInput = document.getElementById('area-length');
+  const areaLenUnitSelect = document.getElementById('area-len-unit');
+  const areaWidthInput = document.getElementById('area-width');
+  const areaWidUnitSelect = document.getElementById('area-wid-unit');
+
+  function toMeters(val, unit) {
+    if (unit === 'm') return val;
+    if (unit === 'ft') return val * 0.3048;
+    if (unit === 'in') return val * 0.0254;
+    if (unit === 'cm') return val * 0.01;
+    if (unit === 'yd') return val * 0.9144;
+    return val;
+  }
+
+  function calculateArea() {
+    const l = parseFloat(areaLengthInput.value);
+    const w = parseFloat(areaWidthInput.value);
+
+    if (isNaN(l) || isNaN(w) || l < 0 || w < 0) {
+      document.getElementById('out-area-sqft').textContent = '—';
+      document.getElementById('out-area-sqm').textContent = '—';
+      document.getElementById('out-area-sqyd').textContent = '—';
+      document.getElementById('out-area-sheets').textContent = '—';
+      document.getElementById('out-area-sheets-sub').textContent = '—';
+      document.getElementById('out-area-perimeter').textContent = '—';
+      return;
+    }
+
+    const lengthM = toMeters(l, areaLenUnitSelect.value);
+    const widthM = toMeters(w, areaWidUnitSelect.value);
+
+    const areaSqm = lengthM * widthM;
+    const areaSqft = areaSqm * 10.7639104;
+    const areaSqyd = areaSqm * 1.19599;
+
+    // Standard sheet: 4x8 ft = 32 sq ft
+    const exactSheets = areaSqft / 32;
+    const practicalSheets = Math.ceil(exactSheets);
+    const withWaste = Math.ceil(exactSheets * 1.10); // +10% waste buffer
+
+    // Perimeter (2 * (L + W))
+    const perimM = 2 * (lengthM + widthM);
+    const perimFt = perimM / 0.3048;
+
+    document.getElementById('out-area-sqft').textContent = formatNum(areaSqft, 1);
+    document.getElementById('out-area-sqm').textContent = formatNum(areaSqm, 2);
+    document.getElementById('out-area-sqyd').textContent = formatNum(areaSqyd, 2) + ' yd²';
+    document.getElementById('out-area-sheets').textContent = `${practicalSheets} Sheets`;
+    document.getElementById('out-area-sheets-sub').textContent = `(${formatNum(exactSheets, 1)} exact • +10% waste: ${withWaste})`;
+    document.getElementById('out-area-perimeter').textContent = `${formatNum(perimFt, 1)} ft (${formatNum(perimM, 2)} m)`;
+  }
+
+  areaLengthInput.addEventListener('input', calculateArea);
+  areaLenUnitSelect.addEventListener('change', calculateArea);
+  areaWidthInput.addEventListener('input', calculateArea);
+  areaWidUnitSelect.addEventListener('change', calculateArea);
+
+  /* ==========================================================================
+     2. WEIGHT & VOLUME TAB CALCULATIONS
+     ========================================================================== */
+  function switchWVMode(mode) {
+    const btnW = document.getElementById('wv-mode-weight');
+    const btnV = document.getElementById('wv-mode-volume');
+    const panelW = document.getElementById('wv-weight-panel');
+    const panelV = document.getElementById('wv-volume-panel');
+
+    if (mode === 'weight') {
+      btnW.classList.add('active');
+      btnV.classList.remove('active');
+      panelW.style.display = 'block';
+      panelV.style.display = 'none';
+      calculateWeight();
+    } else {
+      btnV.classList.add('active');
+      btnW.classList.remove('active');
+      panelV.style.display = 'block';
+      panelW.style.display = 'none';
+      calculateVolume();
+    }
+  }
+
+  // Weight Converter
+  const weightValInput = document.getElementById('weight-val');
+  const weightUnitSelect = document.getElementById('weight-unit');
+
+  function calculateWeight() {
+    const val = parseFloat(weightValInput.value);
+    if (isNaN(val) || val < 0) {
+      document.getElementById('out-w-kg').textContent = '—';
+      document.getElementById('out-w-lbs').textContent = '—';
+      document.getElementById('out-w-g').textContent = '—';
+      document.getElementById('out-w-ton').textContent = '—';
+      document.getElementById('out-w-oz').textContent = '—';
+      return;
+    }
+
+    const unit = weightUnitSelect.value;
+    // Normalize to kg
+    let kg = 0;
+    if (unit === 'kg') kg = val;
+    else if (unit === 'lbs') kg = val * 0.45359237;
+    else if (unit === 'g') kg = val / 1000;
+    else if (unit === 'ton') kg = val * 1000;
+    else if (unit === 'oz') kg = val * 0.02834952;
+
+    const lbs = kg / 0.45359237;
+    const grams = kg * 1000;
+    const tons = kg / 1000;
+    const oz = kg / 0.02834952;
+
+    document.getElementById('out-w-kg').textContent = formatNum(kg, 2);
+    document.getElementById('out-w-lbs').textContent = formatNum(lbs, 2);
+    document.getElementById('out-w-g').textContent = formatCommas(Math.round(grams)) + ' g';
+    document.getElementById('out-w-ton').textContent = formatNum(tons, 3) + ' t';
+    document.getElementById('out-w-oz').textContent = formatNum(oz, 1) + ' oz';
+  }
+
+  function setWeightPreset(val, unit) {
+    weightValInput.value = val;
+    weightUnitSelect.value = unit;
+    calculateWeight();
+  }
+
+  weightValInput.addEventListener('input', calculateWeight);
+  weightUnitSelect.addEventListener('change', calculateWeight);
+
+  // Volume Converter
+  const volumeValInput = document.getElementById('volume-val');
+  const volumeUnitSelect = document.getElementById('volume-unit');
+
+  function calculateVolume() {
+    const val = parseFloat(volumeValInput.value);
+    if (isNaN(val) || val < 0) {
+      document.getElementById('out-v-m3').textContent = '—';
+      document.getElementById('out-v-cuft').textContent = '—';
+      document.getElementById('out-v-l').textContent = '—';
+      document.getElementById('out-v-gal').textContent = '—';
+      return;
+    }
+
+    const unit = volumeUnitSelect.value;
+    // Normalize to Cubic Meters (m³)
+    let m3 = 0;
+    if (unit === 'm3') m3 = val;
+    else if (unit === 'l') m3 = val / 1000;
+    else if (unit === 'gal') m3 = val * 0.00378541;
+    else if (unit === 'cuft') m3 = val * 0.0283168;
+
+    const liters = m3 * 1000;
+    const cuft = m3 * 35.3146667;
+    const gal = liters / 3.785411784;
+
+    document.getElementById('out-v-m3').textContent = formatNum(m3, 3);
+    document.getElementById('out-v-cuft').textContent = formatNum(cuft, 2);
+    document.getElementById('out-v-l').textContent = formatCommas(formatNum(liters, 1)) + ' L';
+    document.getElementById('out-v-gal').textContent = formatNum(gal, 2) + ' gal';
+  }
+
+  function setVolumePreset(val, unit) {
+    volumeValInput.value = val;
+    volumeUnitSelect.value = unit;
+    calculateVolume();
+  }
+
+  volumeValInput.addEventListener('input', calculateVolume);
+  volumeUnitSelect.addEventListener('change', calculateVolume);
+
+  /* ==========================================================================
+     3. MIX RATIOS TAB CALCULATIONS (Unique Selling Feature)
+     ========================================================================== */
+  const mixVolInput = document.getElementById('mix-vol');
+  const mixVolUnitSelect = document.getElementById('mix-vol-unit');
+  const mixRatioSelect = document.getElementById('mix-ratio');
+  const mixBagSizeSelect = document.getElementById('mix-bag-size');
+  const mixWasteSelect = document.getElementById('mix-waste');
+
+  function calculateConcreteMix() {
+    const vol = parseFloat(mixVolInput.value);
+    if (isNaN(vol) || vol <= 0) {
+      document.getElementById('out-mix-bags').textContent = '—';
+      document.getElementById('out-mix-bags-exact').textContent = '';
+      document.getElementById('out-mix-cement-wt').textContent = '—';
+      document.getElementById('out-mix-sand-vol').textContent = '—';
+      document.getElementById('out-mix-sand-sub').textContent = '—';
+      document.getElementById('out-mix-agg-vol').textContent = '—';
+      document.getElementById('out-mix-agg-sub').textContent = '—';
+      document.getElementById('out-mix-water').textContent = '—';
+      return;
+    }
+
+    // Convert input volume to m³
+    const volUnit = mixVolUnitSelect.value;
+    let wetVolM3 = volUnit === 'm3' ? vol : vol * 0.0283168;
+
+    // Apply safety waste factor (e.g. +5% or +10%)
+    const wastePercent = parseFloat(mixWasteSelect.value) / 100;
+    wetVolM3 = wetVolM3 * (1 + wastePercent);
+
+    // Civil engineering dry volume conversion factor (Standard: 1.54)
+    // Concrete shrinks by ~35% when mixed with water and voids filled
+    const dryVolM3 = wetVolM3 * 1.54;
+
+    // Parse ratio parts
+    const ratioParts = mixRatioSelect.value.split(':').map(Number);
+    const cementPart = ratioParts[0];
+    const sandPart = ratioParts[1];
+    const aggPart = ratioParts[2] || 0;
+    const totalParts = cementPart + sandPart + aggPart;
+
+    // 1. Cement Calculation
+    // Cement Volume (m³) = dryVol * (cementPart / totalParts)
+    const cementVolM3 = dryVolM3 * (cementPart / totalParts);
+    // Density of cement = 1440 kg/m³
+    const cementWeightKg = cementVolM3 * 1440;
+    const cementWeightLbs = cementWeightKg * 2.20462;
+
+    const bagSizeKg = parseFloat(mixBagSizeSelect.value);
+    const exactBags = cementWeightKg / bagSizeKg;
+    const buyBags = Math.ceil(exactBags);
+
+    // 2. Sand Calculation
+    const sandVolM3 = dryVolM3 * (sandPart / totalParts);
+    const sandCuft = sandVolM3 * 35.3147;
+    const sandWeightKg = sandVolM3 * 1600; // ~1600 kg/m³ dry sand
+
+    // 3. Aggregate Calculation
+    const aggVolM3 = dryVolM3 * (aggPart / totalParts);
+    const aggCuft = aggVolM3 * 35.3147;
+    const aggWeightKg = aggVolM3 * 1500; // ~1500 kg/m³ gravel
+
+    // 4. Water Estimate (w/c ratio 0.50)
+    const waterLiters = cementWeightKg * 0.50;
+    const waterGal = waterLiters / 3.78541;
+
+    // Render Concrete results
+    document.getElementById('out-mix-bags').textContent = `${buyBags} Bags`;
+    document.getElementById('out-mix-bags-exact').textContent = `(${formatNum(exactBags, 1)} exact)`;
+    document.getElementById('out-mix-cement-wt').textContent = 
+      `${formatCommas(Math.round(cementWeightKg))} kg (${formatCommas(Math.round(cementWeightLbs))} lbs) Total Weight`;
+
+    document.getElementById('out-mix-sand-vol').textContent = `${formatNum(sandVolM3, 2)} m³`;
+    document.getElementById('out-mix-sand-sub').textContent = 
+      `${formatNum(sandCuft, 1)} cu ft • ~${formatCommas(Math.round(sandWeightKg))} kg`;
+
+    if (aggPart > 0) {
+      document.getElementById('out-mix-agg-vol').textContent = `${formatNum(aggVolM3, 2)} m³`;
+      document.getElementById('out-mix-agg-sub').textContent = 
+        `${formatNum(aggCuft, 1)} cu ft • ~${formatCommas(Math.round(aggWeightKg))} kg`;
+    } else {
+      document.getElementById('out-mix-agg-vol').textContent = 'None';
+      document.getElementById('out-mix-agg-sub').textContent = 'Mortar mix without coarse gravel';
+    }
+
+    document.getElementById('out-mix-water').textContent = 
+      `${Math.round(waterLiters)} Liters (${formatNum(waterGal, 1)} US Gal)`;
+  }
+
+  mixVolInput.addEventListener('input', calculateConcreteMix);
+  mixVolUnitSelect.addEventListener('change', calculateConcreteMix);
+  mixRatioSelect.addEventListener('change', calculateConcreteMix);
+  mixBagSizeSelect.addEventListener('change', calculateConcreteMix);
+  mixWasteSelect.addEventListener('change', calculateConcreteMix);
+
+  // Paint Estimator
+  const paintAreaInput = document.getElementById('paint-area');
+  const paintAreaUnitSelect = document.getElementById('paint-area-unit');
+  const paintCoatsSelect = document.getElementById('paint-coats');
+  const paintCoverageSelect = document.getElementById('paint-coverage');
+  const paintDoorsInput = document.getElementById('paint-doors');
+  const paintWindowsInput = document.getElementById('paint-windows');
+
+  function calculatePaint() {
+    const rawArea = parseFloat(paintAreaInput.value);
+    if (isNaN(rawArea) || rawArea < 0) {
+      document.getElementById('out-paint-liters').textContent = '—';
+      document.getElementById('out-paint-gal').textContent = '';
+      document.getElementById('out-paint-buy').textContent = '—';
+      document.getElementById('out-paint-net-area').textContent = '—';
+      document.getElementById('out-paint-net-sub').textContent = '—';
+      document.getElementById('out-paint-total-area').textContent = '—';
+      return;
+    }
+
+    const unit = paintAreaUnitSelect.value;
+    let areaSqm = unit === 'sqm' ? rawArea : rawArea * 0.092903;
+
+    // Deduct openings: 2 m² per door, 1.5 m² per window
+    const doors = Math.max(0, parseInt(paintDoorsInput.value) || 0);
+    const windows = Math.max(0, parseInt(paintWindowsInput.value) || 0);
+    const deductionSqm = (doors * 2.0) + (windows * 1.5);
+
+    const netAreaSqm = Math.max(0, areaSqm - deductionSqm);
+    const netAreaSqft = netAreaSqm * 10.7639;
+
+    const coats = parseInt(paintCoatsSelect.value) || 2;
+    const coverageM2PerLiter = parseFloat(paintCoverageSelect.value) || 10.0;
+
+    const totalAppliedSqm = netAreaSqm * coats;
+    const totalLitersNeeded = totalAppliedSqm / coverageM2PerLiter;
+    const totalGallonsNeeded = totalLitersNeeded / 3.78541;
+
+    // Container recommendations (5-Liter and 1-Liter cans)
+    const fiveLiterCans = Math.floor(totalLitersNeeded / 5);
+    const remainderLiters = totalLitersNeeded - (fiveLiterCans * 5);
+    const oneLiterCans = Math.ceil(remainderLiters);
+
+    let buyAdvice = '';
+    if (fiveLiterCans > 0 && oneLiterCans > 0) {
+      buyAdvice = `Recommended Buy: ${fiveLiterCans} × 5L Bucket + ${oneLiterCans} × 1L Can`;
+    } else if (fiveLiterCans > 0) {
+      buyAdvice = `Recommended Buy: ${fiveLiterCans} × 5L Bucket`;
+    } else {
+      buyAdvice = `Recommended Buy: ${Math.max(1, oneLiterCans)} × 1L Can(s)`;
+    }
+
+    document.getElementById('out-paint-liters').textContent = `${formatNum(totalLitersNeeded, 1)} Liters`;
+    document.getElementById('out-paint-gal').textContent = `(${formatNum(totalGallonsNeeded, 2)} US Gallons)`;
+    document.getElementById('out-paint-buy').textContent = buyAdvice;
+    document.getElementById('out-paint-net-area').textContent = `${formatNum(netAreaSqm, 1)} m²`;
+    document.getElementById('out-paint-net-sub').textContent = `${formatNum(netAreaSqft, 1)} sq ft net after openings`;
+    document.getElementById('out-paint-total-area').textContent = `${formatNum(totalAppliedSqm, 1)} m²`;
+  }
+
+  paintAreaInput.addEventListener('input', calculatePaint);
+  paintAreaUnitSelect.addEventListener('change', calculatePaint);
+  paintCoatsSelect.addEventListener('change', calculatePaint);
+  paintCoverageSelect.addEventListener('change', calculatePaint);
+  paintDoorsInput.addEventListener('input', calculatePaint);
+  paintWindowsInput.addEventListener('input', calculatePaint);
+
+  /* ==========================================================================
+     4. CURRENCY TAB CALCULATIONS (Offline-First, localStorage Saved)
+     ========================================================================== */
+  const currAmountInput = document.getElementById('curr-amount');
+  const currFromSelect = document.getElementById('curr-from');
+  const currToSelect = document.getElementById('curr-to');
+  const currRateInput = document.getElementById('curr-rate');
+  const labelFromCode = document.getElementById('label-from-code');
+
+  let currentExchangeRates = getStoredRates();
+
+  function updateCurrencyRateInput() {
+    const from = currFromSelect.value;
+    const to = currToSelect.value;
+    labelFromCode.textContent = from;
+
+    // Cross-rate calculation relative to USD
+    const rateFromUsd = currentExchangeRates[from] || 1.0;
+    const rateToUsd = currentExchangeRates[to] || 1.0;
+    const directRate = rateToUsd / rateFromUsd;
+
+    currRateInput.value = formatNum(directRate, 4);
+    calculateCurrency();
+  }
+
+  function calculateCurrency() {
+    const amount = parseFloat(currAmountInput.value);
+    const rate = parseFloat(currRateInput.value);
+    const from = currFromSelect.value;
+    const to = currToSelect.value;
+
+    const symbolTo = CURRENCY_SYMBOLS[to] || '';
+
+    if (isNaN(amount) || isNaN(rate) || amount < 0 || rate < 0) {
+      document.getElementById('out-curr-total').textContent = '—';
+      document.getElementById('out-curr-sub').textContent = 'Invalid amount or rate';
+      return;
+    }
+
+    const total = amount * rate;
+    document.getElementById('out-curr-total').textContent = 
+      `${symbolTo} ${formatCommas(formatNum(total, 2))} ${to}`;
+    document.getElementById('out-curr-sub').textContent = 
+      `${formatCommas(amount)} ${from} @ ${rate}`;
+
+    updateQuickTable(rate, from, to);
+  }
+
+  function saveManualRate() {
+    const from = currFromSelect.value;
+    const to = currToSelect.value;
+    const rate = parseFloat(currRateInput.value);
+
+    if (isNaN(rate) || rate <= 0) {
+      showToast('Please enter a valid rate');
+      return;
+    }
+
+    // Update internal cross-rates relative to USD
+    if (from === 'USD') {
+      currentExchangeRates[to] = rate;
+    } else {
+      const fromUsdRate = currentExchangeRates[from] || 1.0;
+      currentExchangeRates[to] = fromUsdRate * rate;
+    }
+
+    saveStoredRates(currentExchangeRates);
+    const statusMsg = document.getElementById('rate-save-status');
+    statusMsg.textContent = `Saved! 1 ${from} = ${rate} ${to} (${new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})})`;
+    showToast(`Rate saved: 1 ${from} = ${rate} ${to}`);
+    calculateCurrency();
+  }
+
+  function swapCurrencies() {
+    const from = currFromSelect.value;
+    const to = currToSelect.value;
+    currFromSelect.value = to;
+    currToSelect.value = from;
+    updateCurrencyRateInput();
+    showToast(`Swapped to ${to} → ${from}`);
+  }
+
+  function updateQuickTable(rate, from, to) {
+    const tableBody = document.getElementById('curr-quick-table-body');
+    document.getElementById('th-curr-from').textContent = `${from} Amount`;
+    document.getElementById('th-curr-to').textContent = `${to} Total`;
+
+    const amounts = [10, 50, 100, 250, 500, 1000, 5000];
+    const symFrom = CURRENCY_SYMBOLS[from] || '';
+    const symTo = CURRENCY_SYMBOLS[to] || '';
+
+    let html = '';
+    amounts.forEach(a => {
+      const conv = a * rate;
+      html += `
+        <tr>
+          <td>${symFrom} ${formatCommas(a)}</td>
+          <td><strong>${symTo} ${formatCommas(formatNum(conv, 2))}</strong></td>
+        </tr>
+      `;
+    });
+    tableBody.innerHTML = html;
+  }
+
+  currAmountInput.addEventListener('input', calculateCurrency);
+  currRateInput.addEventListener('input', () => {
+    calculateCurrency();
+    saveManualRate(); // auto-save on typing as required by user prompt
+  });
+  currFromSelect.addEventListener('change', updateCurrencyRateInput);
+  currToSelect.addEventListener('change', updateCurrencyRateInput);
+
+  /* ==========================================================================
+     5. SETTINGS TAB & UTILITIES
+     ========================================================================== */
+  function resetAppData() {
+    if (confirm('Reset custom exchange rates and restore default values?')) {
+      localStorage.removeItem(STORAGE_KEY_CURR_RATES);
+      currentExchangeRates = Object.assign({}, DEFAULT_RATES);
+      updateCurrencyRateInput();
+      showToast('Defaults restored!');
+    }
+  }
+
+  function copyValue(elementId) {
+    const el = document.getElementById(elementId);
+    if (!el) return;
+    const text = el.textContent.trim();
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(() => {
+        showToast(`Copied: ${text}`);
+      }).catch(() => fallbackCopy(text));
+    } else {
+      fallbackCopy(text);
+    }
+  }
+
+  function fallbackCopy(text) {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    try {
+      document.execCommand('copy');
+      showToast(`Copied: ${text}`);
+    } catch (e) {
+      showToast('Could not copy text');
+    }
+    document.body.removeChild(ta);
+  }
+
+  function showToast(msg) {
+    const toast = document.getElementById('toast');
+    toast.textContent = msg;
+    toast.classList.add('show');
+    setTimeout(() => {
+      toast.classList.remove('show');
+    }, 2200);
+  }
+
+  function formatNum(n, decimals = 2) {
+    if (isNaN(n)) return '0';
+    return Number(n).toFixed(decimals).replace(/\.?0+$/, '');
+  }
+
+  function formatCommas(x) {
+    const parts = x.toString().split(".");
+    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    return parts.join(".");
+  }
+
+  // Master Boot
+  window.addEventListener('DOMContentLoaded', () => {
+    initTheme();
+    initTabs();
+    calculateLength();
+    calculateArea();
+    calculateWeight();
+    calculateVolume();
+    calculateConcreteMix();
+    calculatePaint();
+    updateCurrencyRateInput();
+  });
+</script>
+
+</body>
+</html>
